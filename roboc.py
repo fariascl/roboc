@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-TOKEN = 'TU TOKEN AQUI'
+from constants import TOKEN
 bot = commands.Bot(command_prefix="/", description="este es un bot de prueba")
 
 
