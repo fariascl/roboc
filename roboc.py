@@ -37,7 +37,7 @@ async def temblor(ctx):
 async def dado(ctx):
     import random
     numero = random.randint(1, 6)
-    msg = f"Dado lanzado -> {numero}"
+    msg = f"*Dado lanzado* -> {numero}"
     await ctx.send(msg)
 
 @bot.event
