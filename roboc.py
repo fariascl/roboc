@@ -10,6 +10,16 @@ def getTemblor():
     yeison = json.loads(page.content)
     return yeison[0]
 
+# (COMANDO 3 - PABLO) Funcion para asignar la opcion elegida version Texto.
+def setOpcionCachipun(opcion):
+    if opcion == 1:
+        return "PIEDRA"
+    
+    if opcion == 2:
+        return "PAPEL"
+
+    if opcion == 3:
+        return "TIJERA"
 
 @bot.command()
 async def ping(ctx):
@@ -54,6 +64,63 @@ async def pregunta(ctx, texto : str):
 
     if respuesta == 3:
         msg = "Puede ser.."
+
+    await ctx.send(msg)
+
+# Comando 2 prueba Pablo
+@bot.command()
+async def pregunta(ctx, texto : str):
+    import random
+    respuesta = random.randint(1, 3)
+
+    if respuesta == 1:
+        msg = "**Sí**"
+
+    if respuesta == 2:
+        msg = "**No**"
+
+    if respuesta == 3:
+        msg = "**Puede ser..**"
+
+    await ctx.send(msg)
+
+# Comando 3 Cachipun - Pablo
+@bot.command()
+async def cachipun(ctx, usuario1: discord.User, usuario2: discord.User):
+    import random
+
+    eleccionUsuario1 = random.randint(1, 3)
+    eleccionUsuario2 = random.randint(1, 3)
+
+    opcion1 = setOpcionCachipun(eleccionUsuario1)
+    opcion2 = setOpcionCachipun(eleccionUsuario2)
+
+    '''
+        1) Piedra
+        2) Papel
+        3) Tijera
+    '''
+    # Empate
+    if eleccionUsuario1 == eleccionUsuario2:
+        msg = "{opcion1} vs {opcion2} || EMPATE!!"
+
+    if eleccionUsuario1 == 1 and eleccionUsuario2 == 2:
+        msg = f"{opcion1} vs {opcion2} || GANA {usuario2}"
+
+    if eleccionUsuario1 == 1 and eleccionUsuario2 == 3:
+        msg = f"{opcion1} vs {opcion2} || GANA {usuario1}"
+
+    if eleccionUsuario1 == 2 and eleccionUsuario2 == 1:
+        msg = f"{opcion1} vs {opcion2} || GANA {usuario1}"
+
+    if eleccionUsuario1 == 2 and eleccionUsuario2 == 3:
+        msg = f"{opcion1} vs {opcion2} || GANA {usuario2}"
+
+    if eleccionUsuario1 == 3 and eleccionUsuario2 == 1:
+        msg = f"{opcion1} vs {opcion2} || GANA {usuario2}"
+
+    if eleccionUsuario1 == 3 and eleccionUsuario2 == 2:
+        msg = f"{opcion1} vs {opcion2} || GANA {usuario1}"
 
     await ctx.send(msg)
 
