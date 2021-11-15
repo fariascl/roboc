@@ -32,6 +32,14 @@ async def temblor(ctx):
     msg = f"El último temblor fue el {fecha}, a {refgeo} y tuvo una magnitud de {magnitud}"
     await ctx.send(msg)
 
+# Comando prueba Pablo
+@bot.command()
+async def dado(ctx):
+    import random
+    numero = random.randint(1, 6)
+    msg = f"*Dado lanzado* -> {numero}"
+    await ctx.send(msg)
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='/help'))
