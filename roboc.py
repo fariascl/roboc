@@ -57,23 +57,6 @@ async def pregunta(ctx, texto : str):
     respuesta = random.randint(1, 3)
 
     if respuesta == 1:
-        msg = "Sí"
-
-    if respuesta == 2:
-        msg = "No"
-
-    if respuesta == 3:
-        msg = "Puede ser.."
-
-    await ctx.send(msg)
-
-# Comando 2 prueba Pablo
-@bot.command()
-async def pregunta(ctx, texto : str):
-    import random
-    respuesta = random.randint(1, 3)
-
-    if respuesta == 1:
         msg = "**Sí**"
 
     if respuesta == 2:
