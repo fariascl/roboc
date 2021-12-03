@@ -47,7 +47,7 @@ async def temblor(ctx):
 async def dado(ctx):
     import random
     numero = random.randint(1, 6)
-    msg = f"**Dado lanzado** -> {numero}"
+    msg = f":game_die: **Dado lanzado** :game_die: {numero}"
     await ctx.send(msg)
 
 # Comando 2 prueba Pablo
@@ -85,25 +85,25 @@ async def cachipun(ctx, usuario1: discord.User, usuario2: discord.User):
     '''
     # Empate
     if eleccionUsuario1 == eleccionUsuario2:
-        msg = "{opcion1} vs {opcion2} || EMPATE!!"
+        msg = f"**{opcion1}** vs **{opcion2}** || **EMPATE!!**"
 
     if eleccionUsuario1 == 1 and eleccionUsuario2 == 2:
-        msg = f"{opcion1} vs {opcion2} || GANA {usuario2}"
+        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario2}**"
 
     if eleccionUsuario1 == 1 and eleccionUsuario2 == 3:
-        msg = f"{opcion1} vs {opcion2} || GANA {usuario1}"
+        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario1}**"
 
     if eleccionUsuario1 == 2 and eleccionUsuario2 == 1:
-        msg = f"{opcion1} vs {opcion2} || GANA {usuario1}"
+        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario1}**"
 
     if eleccionUsuario1 == 2 and eleccionUsuario2 == 3:
-        msg = f"{opcion1} vs {opcion2} || GANA {usuario2}"
+        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario2}**"
 
     if eleccionUsuario1 == 3 and eleccionUsuario2 == 1:
-        msg = f"{opcion1} vs {opcion2} || GANA {usuario2}"
+        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario2}**"
 
     if eleccionUsuario1 == 3 and eleccionUsuario2 == 2:
-        msg = f"{opcion1} vs {opcion2} || GANA {usuario1}"
+        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario1}**"
 
     await ctx.send(msg)
 
