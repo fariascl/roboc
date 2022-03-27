@@ -42,6 +42,16 @@ async def temblor(ctx):
     msg = f"El último temblor fue el {fecha}, a {refgeo} y tuvo una magnitud de {magnitud}"
     await ctx.send(msg)
 
+@bot.command()
+async def buscar(ctx, *args):
+    from functions import get_apibay, tuple2string
+    print(args)
+    term = tuple2string(args)
+    row = get_apibay(term)
+    msg = f"Título: {row['name']}\nHash: {row['info_hash']}\nSE: {row['seeders']}\nLE: {row['leechers']}"
+    await ctx.send(msg)
+
+    
 # Comando prueba Pablo
 @bot.command()
 async def dado(ctx):
