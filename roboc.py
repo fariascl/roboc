@@ -48,8 +48,8 @@ async def buscar(ctx, *args):
     print(args)
     term = tuple2string(args)
     row = get_apibay(term)
-    msg = f"Título: {row['name']}\nHash: {row['info_hash']}\nSE: {row['seeders']}\nLE: {row['leechers']}"
-    msg += f"Enlace magnético: http://magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.dump.cl:6969/announce&tr=udp://open.tracker.cl:6969/announce" 
+    msg = f"Título: `{row['name']}`\nHash: `{row['info_hash']}`\nSE: `{row['seeders']}`\nLE: `{row['leechers']}`\n"
+    msg += f"Enlace magnético: `magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.dump.cl:6969/announce&tr=udp://open.tracker.cl:6969/announce`" 
     await ctx.send(msg)
 
     
