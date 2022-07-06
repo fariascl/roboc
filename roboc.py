@@ -43,7 +43,7 @@ async def temblor(ctx):
     await ctx.send(msg)
 
 @bot.command()
-async def clima(ctx):
+async def clima(ctx, *args):
     from functions import get_clima, tuple2string
     ciudad = tuple2string(args)
     print(ciudad)
