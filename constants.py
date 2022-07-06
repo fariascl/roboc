@@ -1,1 +1,3 @@
 TOKEN = ''
+API_CLIMA = ''
+API_CLIMA_KEY = ''

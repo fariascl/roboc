@@ -42,6 +42,18 @@ async def temblor(ctx):
     msg = f"El último temblor fue el {fecha}, a {refgeo} y tuvo una magnitud de {magnitud}"
     await ctx.send(msg)
 
+@bot.commad()
+async def clima(ctx):
+    from functions import get_clima, tuple2string
+    ciudad = tuple2string(args)
+    clima_hoy = get_clima(ciudad)
+    clima_ciudad = clima_hoy[0]
+    clima_maxima = clima_hoy[1]
+    msg = f"La máxima de hoy para {clima_ciudad} será de {clima_maxima} °C"
+    await ctx.send(msg)
+    
+
+
 @bot.command()
 async def buscar(ctx, *args):
     from functions import get_apibay, tuple2string
