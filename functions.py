@@ -30,6 +30,6 @@ def get_clima(ciudad: str):
         response_final = get(f'http://api.meteored.cl/index.php?api_lang=cl&localidad={id_ciudad}&affiliate_id={API_CLIMA_KEY}')
         xml_clima = xmltodict.parse(response_final.content)
         nombre_ciudad = xml_clima['report']['location']['@city']
-        maxima_hoy = xml_clima['report']['location']['var'][1]['data']['forecast'][0]
+        maxima_hoy = xml_clima['report']['location']['var'][1]['data']['forecast'][0]['@value']
         return nombre_ciudad, maxima_hoy
 
