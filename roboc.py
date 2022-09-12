@@ -27,44 +27,55 @@ async def ping(ctx):
 
 @bot.command()
 async def temblor(ctx):
-    from datetime import datetime
-    temblor = getTemblor()
-    fecha_api = temblor['Fecha']
-    d = fecha_api
-    fecha_aux = datetime.strptime(d, "%Y-%m-%d %H:%M:%S")
-    fecha = fecha_aux.strftime("%d-%m-%Y a las %H:%M:%S")
-    print(fecha)
-    latitud = temblor['Latitud']
-    longitud = temblor['Longitud']
-    profundidad = temblor['Profundidad']
-    magnitud = temblor['Magnitud']
-    refgeo = temblor['RefGeografica']
-    msg = f"El último temblor fue el {fecha}, a {refgeo} y tuvo una magnitud de {magnitud}"
-    await ctx.send(msg)
+    try:
+        from datetime import datetime
+        temblor = getTemblor()
+        fecha_api = temblor['Fecha']
+        d = fecha_api
+        fecha_aux = datetime.strptime(d, "%Y-%m-%d %H:%M:%S")
+        fecha = fecha_aux.strftime("%d-%m-%Y a las %H:%M:%S")
+        print(fecha)
+        latitud = temblor['Latitud']
+        longitud = temblor['Longitud']
+        profundidad = temblor['Profundidad']
+        magnitud = temblor['Magnitud']
+        refgeo = temblor['RefGeografica']
+        msg = f"El último temblor fue el {fecha}, a {refgeo} y tuvo una magnitud de {magnitud}"
+        await ctx.send(msg)
+    except:
+        msg = "Ha ocurrido un problema al obtener el último temblor, consulta más tarde"
+        await ctx.send(msg)
 
 @bot.command()
 async def clima(ctx, *args):
-    from functions import get_clima, tuple2string
-    ciudad = tuple2string(args)
-    print(ciudad)
-    clima_hoy = get_clima(ciudad)
-    clima_ciudad = clima_hoy[0]
-    clima_maxima = clima_hoy[1]
-    msg = f"La máxima de hoy para {clima_ciudad} será de {clima_maxima} °C"
-    await ctx.send(msg)
+    try:
+        from functions import get_clima, tuple2string
+        ciudad = tuple2string(args)
+        print(ciudad)
+        clima_hoy = get_clima(ciudad)
+        clima_ciudad = clima_hoy[0]
+        clima_maxima = clima_hoy[1]
+        msg = f"La máxima de hoy para {clima_ciudad} será de {clima_maxima} °C"
+        await ctx.send(msg)
+    except:
+        msg = "Ha ocurrido un problema al obtener el clima, consulta más tarde"
+        await ctx.send(msg)
 
 
 
 @bot.command()
 async def buscar(ctx, *args):
-    from functions import get_apibay, tuple2string
-    print(args)
-    term = tuple2string(args)
-    row = get_apibay(term)
-    msg = f"Título: `{row['name']}`\nHash: `{row['info_hash']}`\nSE: `{row['seeders']}`\nLE: `{row['leechers']}`\n"
-    msg += f"Enlace magnético: `magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.dump.cl:6969/announce&tr=udp://open.tracker.cl:6969/announce`" 
-    await ctx.send(msg)
-
+    try:
+        from functions import get_apibay, tuple2string
+        print(args)
+        term = tuple2string(args)
+        row = get_apibay(term)
+        msg = f"Título: `{row['name']}`\nHash: `{row['info_hash']}`\nSE: `{row['seeders']}`\nLE: `{row['leechers']}`\n"
+        msg += f"Enlace magnético: `magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.dump.cl:6969/announce&tr=udp://open.tracker.cl:6969/announce`" 
+        await ctx.send(msg)
+    except:
+        msg = "Ha ocurrido un error al buscar, consulta más tarde"
+        await ctx.send(msg)
     
 # Comando prueba Pablo
 @bot.command()
