@@ -1,11 +1,8 @@
 import json
-import xmltodict
-from requests import get
-from constants import API_CLIMA, API_CLIMA_KEY
+import requests
 import meteoredpy
 import os
 from dotenv import load_dotenv
-import db
 
 load_dotenv()
 
@@ -18,7 +15,7 @@ def get_apibay(term: str):
 
 
 def tuple2string(tupla):
-    return ''.join(tupla)
+    return ' '.join(tupla)
 
 
 def get_clima(ciudad: str):
@@ -111,13 +108,12 @@ def get_cachipun(usuario1, usuario2):
 
 def get_torrent(term):
     try:
-        from functions import get_apibay, tuple2string
-        print(args)
-        term = tuple2string(args)
+        term = tuple2string(term)
         row = get_apibay(term)
-        msg = f"Título: `{row['name']}`\nHash: `{row['info_hash']}`\nSE: `{row['seeders']}`\nLE: `{row['leechers']}`\n"
-        msg += f"Enlace magnético: `magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.dump.cl:6969/announce&tr=udp://open.tracker.cl:6969/announce`"
+        msg = f"Título: `{row['name']}`\n:hash:: `{row['info_hash']}`\n:arrow_up:: `{row['seeders']}`\n:arrow_down:: `{row['leechers']}`\n"
+        msg += f":magnet:: `magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.cubonegro.lol:6969/announce&tr=udp://open.tracker.cl:6969/announce`"
         return msg
-    except:
-        msg = "Ha ocurrido un error al buscar, consulta más tarde"
+    except Exception as e:
+        msg = f"Ha ocurrido un error ({e}) al buscar, consulta más tarde"
+        print(msg)
         return msg
