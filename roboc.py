@@ -13,16 +13,16 @@ async def ping(ctx):
 
 @bot.command()
 async def ayuda(ctx):
-    msg = "Hola!, soy roboc, un :robot: para todo uso\n"
+    msg = "**Hola!, soy roboc, un :robot: para todo uso**\n"
     msg += "Los comandos disponibles son: \n"
-    msg += "`/recordar` permite poner un recordatorio :alarm_clock:. Uso: `/recordar \"asunto\" dd-MM-AA hh:mm` \n"
-    msg += "`/clima` permite ver la temperatura :partly_sunny: máxima en alguna ciudad. Uso: `/clima conce`\n"
-    msg += "`/temblor` permite ver el último temblor registrado\n"
-    msg += "`/torrent` permite buscar torrents relacionados a un título. Uso: `/torrent los simpson`\n"
-    msg += "`/dado` permite lanzar un dado :game_dice: \n"
-    msg += "`/pregunta` permite preguntar. Uso: `/pregunta \"me irá bien en el certamen?\"`\n"
-    msg += "`/cachipun` permite jugar al cachipún :fist:  :leftwards_hand: (al azar) entre dos usuarios. Uso `/cachipun @usuarioA @usuarioB`\n"
-    msg += "`/ayuda` permite ver este mensaje\n"
+    msg += "\n**`/recordar`** permite poner un recordatorio :alarm_clock:.\n> **Uso:** __/recordar__ *\"asunto\" dd-MM-AA hh:mm*"
+    msg += "\n\n**`/clima`** permite ver la temperatura :partly_sunny: máxima en alguna ciudad.\n> **Uso:** __/clima__ *conce*"
+    msg += "\n\n**`/temblor`** permite ver el último temblor registrado"
+    msg += "\n\n**`/torrent`** permite buscar torrents relacionados a un título.\n> **Uso:** __/torrent__ *los simpson*"
+    msg += "\n\n**`/dado`** permite lanzar un dado :game_die:"
+    msg += "\n\n**`/pregunta`** permite preguntar.\n> **Uso:** __/pregunta__ *\"me irá bien en el certamen?\"*"
+    msg += "\n\n**`/cachipun`** permite jugar al cachipún :fist: :leftwards_hand: :v: (al azar) entre dos usuarios.\n> **Uso:** __/cachipun__ *@usuarioA @usuarioB*"
+    msg += "\n\n**`/ayuda`** permite ver este mensaje\n"
     await ctx.send(msg)
 
 @bot.command()
@@ -57,7 +57,7 @@ async def clima(ctx, *args):
 async def dado(ctx):
     import random
     numero = random.randint(1, 6)
-    msg = f":game_die: **Dado lanzado** :game_die: {numero}"
+    msg = f":game_die: **Dado lanzado** :game_die:\n>             {numero}"
     await ctx.send(msg)
 
 # Comando 2 prueba Pablo
@@ -118,7 +118,7 @@ async def recordando(recordatorios):
                 usuario = await bot.fetch_user(recordatorio[0])
                 if usuario and recordatorio[4] == 'on':
                     # usuario_id, asunto, fecha, created_at
-                    await usuario.send(f"¡Riiing, riiing! RECORDATORIO: {recordatorio[1]}, Fecha:{recordatorio[2]}")
+                    await usuario.send(f"¡Riiing, riiing! **RECORDATORIO:** {recordatorio[1]}, **Fecha:** {recordatorio[2]}")
     except Exception as e:
         #print(e)
         print("Error al recordar")
