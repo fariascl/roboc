@@ -1,149 +1,140 @@
 import discord
 from discord.ext import commands
-from constants import TOKEN
-bot = commands.Bot(command_prefix="/", description="este es un bot de prueba")
+from functions import *
+import asyncio
+import datetime
+import classes.recordatorio as recordatorio
+bot = commands.Bot(command_prefix="/", description="Bot para hacer cosas")
 
-
-def getTemblor():
-    import requests, json
-    page = requests.get("https://api.gael.cloud/general/public/sismos")
-    yeison = json.loads(page.content)
-    return yeison[0]
-
-# (COMANDO 3 - PABLO) Funcion para asignar la opcion elegida version Texto.
-def setOpcionCachipun(opcion):
-    if opcion == 1:
-        return "PIEDRA"
-    
-    if opcion == 2:
-        return "PAPEL"
-
-    if opcion == 3:
-        return "TIJERA"
 
 @bot.command()
 async def ping(ctx):
     await ctx.send('pong')
 
 @bot.command()
+async def ayuda(ctx):
+    msg = "**Hola!, soy roboc, un :robot: para todo uso**\n"
+    msg += "Los comandos disponibles son: \n"
+    msg += "\n**`/recordar`** permite poner un recordatorio :alarm_clock:.\n> **Uso:** __/recordar__ *\"asunto\" dd-MM-AA hh:mm*"
+    msg += "\n\n**`/clima`** permite ver la temperatura :partly_sunny: máxima en alguna ciudad.\n> **Uso:** __/clima__ *conce*"
+    msg += "\n\n**`/temblor`** permite ver el último temblor registrado"
+    msg += "\n\n**`/torrent`** permite buscar torrents relacionados a un título.\n> **Uso:** __/torrent__ *los simpson*"
+    msg += "\n\n**`/dado`** permite lanzar un dado :game_die:"
+    msg += "\n\n**`/pregunta`** permite preguntar.\n> **Uso:** __/pregunta__ *\"me irá bien en el certamen?\"*"
+    msg += "\n\n**`/cachipun`** permite jugar al cachipún :fist: :leftwards_hand: :v: (al azar) entre dos usuarios.\n> **Uso:** __/cachipun__ *@usuarioA @usuarioB*"
+    msg += "\n\n**`/ayuda`** permite ver este mensaje\n"
+    await ctx.send(msg)
+
+@bot.command()
 async def temblor(ctx):
     try:
-        from datetime import datetime
-        temblor = getTemblor()
-        fecha_api = temblor['Fecha']
-        d = fecha_api
-        fecha_aux = datetime.strptime(d, "%Y-%m-%d %H:%M:%S")
-        fecha = fecha_aux.strftime("%d-%m-%Y a las %H:%M:%S")
-        print(fecha)
-        latitud = temblor['Latitud']
-        longitud = temblor['Longitud']
-        profundidad = temblor['Profundidad']
-        magnitud = temblor['Magnitud']
-        refgeo = temblor['RefGeografica']
-        msg = f"El último temblor fue el {fecha}, a {refgeo} y tuvo una magnitud de {magnitud}"
+        msg = get_temblor()
         await ctx.send(msg)
     except:
         msg = "Ha ocurrido un problema al obtener el último temblor, consulta más tarde"
         await ctx.send(msg)
 
+
+@bot.command()
+async def torrent(ctx, *args):
+    torrent = get_torrent(args)
+    await ctx.send(torrent)
+
+
 @bot.command()
 async def clima(ctx, *args):
     try:
         from functions import get_clima, tuple2string
-        ciudad = tuple2string(args)
-        print(ciudad)
-        clima_hoy = get_clima(ciudad)
-        clima_ciudad = clima_hoy[0]
-        clima_maxima = clima_hoy[1]
-        msg = f"La máxima de hoy para {clima_ciudad} será de {clima_maxima} °C"
+        msg = get_clima(args)
         await ctx.send(msg)
     except:
         msg = "Ha ocurrido un problema al obtener el clima, consulta más tarde"
         await ctx.send(msg)
 
 
-
-@bot.command()
-async def buscar(ctx, *args):
-    try:
-        from functions import get_apibay, tuple2string
-        print(args)
-        term = tuple2string(args)
-        row = get_apibay(term)
-        msg = f"Título: `{row['name']}`\nHash: `{row['info_hash']}`\nSE: `{row['seeders']}`\nLE: `{row['leechers']}`\n"
-        msg += f"Enlace magnético: `magnet:?xt=urn:btih:{row['info_hash']}&dn={row['name']}&tr=udp://tracker.dump.cl:6969/announce&tr=udp://open.tracker.cl:6969/announce`" 
-        await ctx.send(msg)
-    except:
-        msg = "Ha ocurrido un error al buscar, consulta más tarde"
-        await ctx.send(msg)
-    
 # Comando prueba Pablo
 @bot.command()
 async def dado(ctx):
     import random
     numero = random.randint(1, 6)
-    msg = f":game_die: **Dado lanzado** :game_die: {numero}"
+    msg = f":game_die: **Dado lanzado** :game_die:\n>             {numero}"
     await ctx.send(msg)
 
 # Comando 2 prueba Pablo
+
+
 @bot.command()
-async def pregunta(ctx, texto : str):
-    import random
-    respuesta = random.randint(1, 3)
-
-    if respuesta == 1:
-        msg = "**Sí**"
-
-    if respuesta == 2:
-        msg = "**No**"
-
-    if respuesta == 3:
-        msg = "**Puede ser..**"
-
+async def pregunta(ctx):
+    msg = get_pregunta()
     await ctx.send(msg)
 
 # Comando 3 Cachipun - Pablo
+
+
 @bot.command()
 async def cachipun(ctx, usuario1: discord.User, usuario2: discord.User):
-    import random
-
-    eleccionUsuario1 = random.randint(1, 3)
-    eleccionUsuario2 = random.randint(1, 3)
-
-    opcion1 = setOpcionCachipun(eleccionUsuario1)
-    opcion2 = setOpcionCachipun(eleccionUsuario2)
-
-    '''
-        1) Piedra
-        2) Papel
-        3) Tijera
-    '''
-    # Empate
-    if eleccionUsuario1 == eleccionUsuario2:
-        msg = f"**{opcion1}** vs **{opcion2}** || **EMPATE!!**"
-
-    if eleccionUsuario1 == 1 and eleccionUsuario2 == 2:
-        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario2}**"
-
-    if eleccionUsuario1 == 1 and eleccionUsuario2 == 3:
-        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario1}**"
-
-    if eleccionUsuario1 == 2 and eleccionUsuario2 == 1:
-        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario1}**"
-
-    if eleccionUsuario1 == 2 and eleccionUsuario2 == 3:
-        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario2}**"
-
-    if eleccionUsuario1 == 3 and eleccionUsuario2 == 1:
-        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario2}**"
-
-    if eleccionUsuario1 == 3 and eleccionUsuario2 == 2:
-        msg = f"**{opcion1}** vs **{opcion2}** || **GANA {usuario1}**"
-
+    msg = get_cachipun(usuario1, usuario2)
     await ctx.send(msg)
+
+
+@bot.command()
+async def recordar(ctx: commands.context.Context, *args):
+    try:
+        asunto = tuple2string(args[0:len(args)-2])
+        print(asunto)
+        fecha_hora_received = f"{args[len(args)-2]} {args[len(args)-1]}"
+        fecha_hora_parsed = datetime.datetime.strptime(
+            fecha_hora_received, "%d-%m-%Y %H:%M")
+        dia = fecha_hora_parsed.day
+        mes = fecha_hora_parsed.month
+        anio = fecha_hora_parsed.year
+        hora = fecha_hora_parsed.hour
+        minutos = fecha_hora_parsed.minute
+        fecha_hora = f"{anio}-{mes}-{dia} {hora}:{minutos}"
+        # usuario_id, asunto, fecha
+        msg = recordatorio.Recordatorio().create_recordatorio(
+            ctx.author.id, asunto, fecha_hora)
+        await ctx.send(msg)
+    except Exception as e:
+        print(e)
+
+
+@bot.command()
+async def recordatorios(ctx: commands.context.Context):
+    msg = recordatorio.Recordatorio().get_recordatorios(ctx.author.id)[0]
+    await ctx.send(msg)
+
+
+@bot.command()
+async def parar(ctx: commands.context.Context):
+    msg = recordatorio.Recordatorio().stop_recordatorio(ctx.author.id)
+    await ctx.send(msg)
+
+
+async def recordando(recordatorios):
+    try:
+        if (len(recordatorios) > 0):
+            for recordatorio in recordatorios:
+                usuario = await bot.fetch_user(recordatorio[0])
+                if usuario and recordatorio[4] == 'on':
+                    # usuario_id, asunto, fecha, created_at
+                    await usuario.send(f"¡Riiing, riiing! **RECORDATORIO:** {recordatorio[1]}, **Fecha:** {recordatorio[2]}")
+    except Exception as e:
+        #print(e)
+        print("Error al recordar")
+
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='/help'))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='/ayuda'))
     print("El bot está listo")
-bot.run(TOKEN)
+    while True:
+        recordatorios = recordatorio.Recordatorio().execute_recordatorios()
+        if recordatorios != -1:
+            #print("Ejecutando recordatorios")
+            await recordando(recordatorios)  # Llama a tu función
+        #else:
+            #print("No hay recordatorios")
+        await asyncio.sleep(3)
+
+bot.run(os.getenv('TOKEN'))

@@ -1,0 +1,5 @@
+meteoredpy==0.0.4
+discord==1.7.3
+discord.py==1.7.3
+python_dotenv==1.0.0
+pymysql==1.0.2
