@@ -1,6 +1,6 @@
 import json
 import requests
-import meteoredpy
+from meteoredpy import Meteoredpy
 import os
 from dotenv import load_dotenv
 
@@ -21,7 +21,7 @@ def tuple2string(tupla):
 def get_clima(ciudad: str):
     # Convierte los parámetros en una cadena, por ejemplo: ['Viña','del','Mar'] a 'Viña del Mar'
     ciudad = tuple2string(ciudad)
-    clima = meteoredpy(os.getenv('API_CLIMA_TOKEN')).get(ciudad)
+    clima = Meteoredpy(os.getenv('API_CLIMA_TOKEN')).get(ciudad)
     msg = f"La máxima de hoy para {clima['ciudad']} será de {clima['maxima']} °C"
     return msg
 
