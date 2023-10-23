@@ -21,7 +21,7 @@ def tuple2string(tupla):
 def get_clima(ciudad: str):
     # Convierte los parámetros en una cadena, por ejemplo: ['Viña','del','Mar'] a 'Viña del Mar'
     ciudad = tuple2string(ciudad)
-    clima = meteoredpy(os.getenv('API_CLIMA_KEY')).get(ciudad)
+    clima = meteoredpy(os.getenv('API_CLIMA_TOKEN')).get(ciudad)
     msg = f"La máxima de hoy para {clima['ciudad']} será de {clima['maxima']} °C"
     return msg
 

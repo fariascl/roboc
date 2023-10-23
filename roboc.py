@@ -44,7 +44,6 @@ async def torrent(ctx, *args):
 @bot.command()
 async def clima(ctx, *args):
     try:
-        from functions import get_clima, tuple2string
         msg = get_clima(args)
         await ctx.send(msg)
     except:
