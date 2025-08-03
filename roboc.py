@@ -18,7 +18,6 @@ async def ayuda(ctx):
     msg += "\n**`/recordar`** permite poner un recordatorio :alarm_clock:.\n> **Uso:** __/recordar__ *\"asunto\" dd-MM-AA hh:mm*"
     msg += "\n\n**`/clima`** permite ver la temperatura :partly_sunny: máxima en alguna ciudad.\n> **Uso:** __/clima__ *conce*"
     msg += "\n\n**`/temblor`** permite ver el último temblor registrado"
-    msg += "\n\n**`/torrent`** permite buscar torrents relacionados a un título.\n> **Uso:** __/torrent__ *los simpson*"
     msg += "\n\n**`/dado`** permite lanzar un dado :game_die:"
     msg += "\n\n**`/pregunta`** permite preguntar.\n> **Uso:** __/pregunta__ *\"me irá bien en el certamen?\"*"
     msg += "\n\n**`/cachipun`** permite jugar al cachipún :fist: :leftwards_hand: :v: (al azar) entre dos usuarios.\n> **Uso:** __/cachipun__ *@usuarioA @usuarioB*"
@@ -30,15 +29,10 @@ async def temblor(ctx):
     try:
         msg = get_temblor()
         await ctx.send(msg)
-    except:
-        msg = "Ha ocurrido un problema al obtener el último temblor, consulta más tarde"
+    except Exception as e:
+        msg = f"Ha ocurrido un problema ({e}) al obtener el último temblor, consulta más tarde"
         await ctx.send(msg)
 
-
-@bot.command()
-async def torrent(ctx, *args):
-    torrent = get_torrent(args)
-    await ctx.send(torrent)
 
 
 @bot.command()
@@ -110,30 +104,30 @@ async def parar(ctx: commands.context.Context):
     await ctx.send(msg)
 
 
-async def recordando(recordatorios):
-    try:
-        if (len(recordatorios) > 0):
-            for recordatorio in recordatorios:
-                usuario = await bot.fetch_user(recordatorio[0])
-                if usuario and recordatorio[4] == 'on':
-                    # usuario_id, asunto, fecha, created_at
-                    await usuario.send(f"¡Riiing, riiing! **RECORDATORIO:** {recordatorio[1]}, **Fecha:** {recordatorio[2]}")
-    except Exception as e:
-        #print(e)
-        print("Error al recordar")
+# async def recordando(recordatorios):
+#     try:
+#         if (len(recordatorios) > 0):
+#             for recordatorio in recordatorios:
+#                 usuario = await bot.fetch_user(recordatorio[0])
+#                 if usuario and recordatorio[4] == 'on':
+#                     # usuario_id, asunto, fecha, created_at
+#                     await usuario.send(f"¡Riiing, riiing! **RECORDATORIO:** {recordatorio[1]}, **Fecha:** {recordatorio[2]}")
+#     except Exception as e:
+#         #print(e)
+#         print("Error al recordar")
 
 
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name='/ayuda'))
     print("El bot está listo")
-    while True:
-        recordatorios = recordatorio.Recordatorio().execute_recordatorios()
-        if recordatorios != -1:
-            #print("Ejecutando recordatorios")
-            await recordando(recordatorios)  # Llama a tu función
-        #else:
-            #print("No hay recordatorios")
-        await asyncio.sleep(3)
+    # while True:
+    #     recordatorios = recordatorio.Recordatorio().execute_recordatorios()
+    #     if recordatorios != -1:
+    #         #print("Ejecutando recordatorios")
+    #         await recordando(recordatorios)  # Llama a tu función
+    #     #else:
+    #         #print("No hay recordatorios")
+    #     await asyncio.sleep(3)
 
 bot.run(os.getenv('TOKEN'))

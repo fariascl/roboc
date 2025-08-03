@@ -1,9 +1,8 @@
-CREATE TABLE
-    recordatorio (
-        id BIGINT PRIMARY KEY AUTO_INCREMENT,
-        usuario_id BIGINT,
-        asunto TEXT,
-        fecha DATETIME,
-        created_at DATETIME,
-        status VARCHAR(3)
-    );
+CREATE TABLE recordatorio (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    usuario_id INTEGER,
+    asunto TEXT,
+    fecha DATETIME,
+    created_at DATETIME,
+    status TEXT
+);
