@@ -53,7 +53,7 @@ class Recordatorio:
 
     def execute_recordatorios(self):
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        print(now)
+        # print(now)
 
         try:
             cursor = self.conn.cursor()
