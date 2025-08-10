@@ -91,10 +91,7 @@ class Recordatorio:
             try:
                 cursor = self.conn.cursor()
                 query = "UPDATE recordatorio SET status='off' WHERE id = ?;"
-                cursor.execute(
-                    query,
-                    (last_id,)
-                )
+                cursor.execute(query, (last_id,))
                 self.conn.commit()
                 cursor.close()
                 self.conn.close()

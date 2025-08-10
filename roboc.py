@@ -21,10 +21,12 @@ async def ayuda(ctx):
     msg += "Los comandos disponibles son: \n"
     msg += '\n**`/recordar`** permite poner un recordatorio :alarm_clock:.\n> **Uso:** __/recordar__ *"asunto" dd-MM-AA hh:mm*'
     msg += "\n\n**`/clima`** permite ver la temperatura :partly_sunny: máxima en alguna ciudad.\n> **Uso:** __/clima__ *conce*"
-    msg += "\n\n**`/temblor <ciudad>`** permite ver el último temblor registrado"
+    msg += "\n\n**`/temblor`** permite ver el último temblor registrado"
     msg += "\n\n**`/dado`** permite lanzar un dado :game_die:"
     msg += '\n\n**`/pregunta`** permite preguntar.\n> **Uso:** __/pregunta__ *"me irá bien en el certamen?"*'
     msg += "\n\n**`/cachipun`** permite jugar al cachipún :fist: :leftwards_hand: :v: (al azar) entre dos usuarios.\n> **Uso:** __/cachipun__ *@usuarioA @usuarioB*"
+    msg += "\n\n**`/acortar <link>`** permite generar una URL corta :link:.\n> **Uso:** __/acortar__ *https://ejemplo.com*"
+
     msg += "\n\n**`/ayuda`** permite ver este mensaje\n"
     await ctx.send(msg)
 
@@ -81,21 +83,21 @@ async def cachipun(ctx, usuario1: discord.User, usuario2: discord.User):
     try:
         msg = functions.get_cachipun(usuario1, usuario2)
     except Exception as e:
+        print(type)
         helpers.log_to_file("/cachipun", e, "ERROR")
         msg = (
             f"Ha ocurrido un problema ({e}) al obtener `/cachipun`, consulta más tarde"
         )
     await ctx.send(msg)
-    
+
+
 @bot.command()
 async def acortar(ctx: commands.context.Context, *args):
     try:
-        msg = functions.get_acortar(args[0])
+        msg = functions.get_acortar(args)
     except Exception as e:
         helpers.log_to_file("/acortar", e, "ERROR")
-        msg = (
-            f"Ha ocurrido un problema ({e}) al obtener `/acortar`, consulta más tarde"
-        )
+        msg = f"Ha ocurrido un problema ({e}) al obtener `/acortar`, consulta más tarde"
     await ctx.send(msg)
 
 
@@ -104,7 +106,7 @@ async def recordar(ctx: commands.context.Context, *args):
     try:
         if len(args) < 3:
             await ctx.send(
-                "Por favor proporciona un asunto, fecha y hora. Ej: `/recordar tarea 05-08-2025 21:30`"
+                "Por favor proporciona un asunto, fecha y hora :alarm_clock:. Ej: `/recordar tarea 05-08-2025 21:30`"
             )
             return
 
@@ -190,6 +192,17 @@ async def on_ready():
         # else:
         # print("No hay recordatorios")
         await asyncio.sleep(3)
+        
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send(":see_no_evil: Comando no encontrado")
+    elif isinstance(error, commands.MissingRequiredArgument):
+        await ctx.send(":exclamation: Faltan argumentos")
+    elif isinstance(error, commands.UserNotFound):
+        await ctx.send(":people_wrestling: Uno de los usuarios no existe, por favor etiqueta correctamente al usuario ")
+    else:
+        await ctx.send(f"Ocurrió un error: {error}")
 
 
 bot.run(os.getenv("TOKEN"))

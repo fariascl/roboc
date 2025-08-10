@@ -62,10 +62,6 @@ def setOpcionCachipun(opcion):
 
 
 def get_cachipun(usuario1, usuario2):
-    if helpers.is_empty_or_whitespace(usuario1) or helpers.is_empty_or_whitespace(
-        usuario2
-    ):
-        msg = "El comando debe ser: `/cachipun @usuario1 @usuario2`"
     eleccionUsuario1 = random.randint(0, 2)
     eleccionUsuario2 = random.randint(0, 2)
 
@@ -92,7 +88,11 @@ def get_dado():
     return msg
 
 
-def get_acortar(url):
+def get_acortar(args):
+    if len(args) > 1:
+        msg = "El comando debe ser `/acortar https://ejemplo.cl`"
+        return msg
+    url = args[0]
     if url[0:4] != "http":
         msg = "La URL a acortar debe estar en el formato `http://ejemplo.cl` o `https://ejemplo.cl`"
         return msg
