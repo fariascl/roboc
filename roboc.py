@@ -86,6 +86,17 @@ async def cachipun(ctx, usuario1: discord.User, usuario2: discord.User):
             f"Ha ocurrido un problema ({e}) al obtener `/cachipun`, consulta más tarde"
         )
     await ctx.send(msg)
+    
+@bot.command()
+async def acortar(ctx: commands.context.Context, *args):
+    try:
+        msg = functions.get_acortar(args[0])
+    except Exception as e:
+        helpers.log_to_file("/acortar", e, "ERROR")
+        msg = (
+            f"Ha ocurrido un problema ({e}) al obtener `/acortar`, consulta más tarde"
+        )
+    await ctx.send(msg)
 
 
 @bot.command()

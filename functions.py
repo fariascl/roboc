@@ -62,7 +62,9 @@ def setOpcionCachipun(opcion):
 
 
 def get_cachipun(usuario1, usuario2):
-    if (helpers.is_empty_or_whitespace(usuario1) or helpers.is_empty_or_whitespace(usuario2)):
+    if helpers.is_empty_or_whitespace(usuario1) or helpers.is_empty_or_whitespace(
+        usuario2
+    ):
         msg = "El comando debe ser: `/cachipun @usuario1 @usuario2`"
     eleccionUsuario1 = random.randint(0, 2)
     eleccionUsuario2 = random.randint(0, 2)
@@ -87,4 +89,28 @@ def get_cachipun(usuario1, usuario2):
 def get_dado():
     numero = random.randint(1, 6)
     msg = f":game_die: **Dado lanzado** :game_die:\n>             {numero}"
+    return msg
+
+
+def get_acortar(url):
+    if url[0:4] != "http":
+        msg = "La URL a acortar debe estar en el formato `http://ejemplo.cl` o `https://ejemplo.cl`"
+        return msg
+
+    params = {
+        "signature": os.getenv("SHORTENER_API_SIGNATURE"),
+        "action": "shorturl",
+        "url": url,
+        "format": "json",
+    }
+    short = requests.get(os.getenv("SHORTENER_API_URL"), params=params).json()
+    if short["statusCode"] != "200":
+        msg = (
+            f":link: **URL Corta:** {short['shorturl']}\n"
+            f":arrow_right: `{short['shorturl']}`\n"
+            f":bar_chart: Clicks: `{short['url']['clicks']}` :point_up:"
+        )
+    else:
+        msg = f":link: **URL Corta:** {short['shorturl']}\n"
+
     return msg
