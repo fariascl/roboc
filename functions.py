@@ -11,13 +11,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def get_clima(ciudad: str):
+def get_clima(ciudad):
     # Convierte los parámetros en una cadena, por ejemplo: ['Viña','del','Mar'] a 'Viña del Mar'
     ciudad = helpers.tuple2string(ciudad)
-    if helpers.is_empty_or_whitespace(ciudad):
+    if helpers.is_empty_or_whitespace(ciudad):  
         msg = "El comando debe ser: `/clima conce`"
         return msg
-
     clima = Meteoredpy(os.getenv("API_CLIMA_TOKEN")).get(ciudad)
     msg = f"La máxima de hoy para {clima['ciudad']} será de {clima['maxima']} °C"
     return msg
