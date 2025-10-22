@@ -7,15 +7,23 @@ import functions
 import helpers
 import classes.recordatorio as recordatorio
 import yt_dlp
+import re
+import requests
 
-# Crear bot
-bot = commands.Bot(command_prefix="/", description="Bot para todo uso", intents=discord.Intents.all())
+# ----------------- CONFIG -----------------
+bot = commands.Bot(
+    command_prefix="/",
+    description="Bot para todo uso",
+    intents=discord.Intents.all()
+)
 
-# Diccionario de colas por servidor
-music_queues = {}
+music_queues = {}  # Diccionario de colas por servidor
 
-# ==================== COMANDOS EXISTENTES ====================
+FFMPEG_OPTIONS = {
+    'options': '-vn -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
+}
 
+# ----------------- COMANDOS GENERALES -----------------
 @bot.command()
 async def ping(ctx):
     await ctx.send("pong")
@@ -24,72 +32,17 @@ async def ping(ctx):
 async def ayuda(ctx):
     msg = "**Hola!, soy roboc, un :robot: para todo uso**\n"
     msg += "Los comandos disponibles son: \n"
-    msg += '\n**`/recordar`** permite poner un recordatorio :alarm_clock:.\n> **Uso:** /recordar "asunto" dd-MM-AA hh:mm'
-    msg += "\n\n**`/clima`** permite ver la temperatura :partly_sunny: máxima en alguna ciudad."
-    msg += "\n\n**`/temblor`** permite ver el último temblor registrado"
-    msg += "\n\n**`/dado`** permite lanzar un dado :game_die:"
-    msg += "\n\n**`/pregunta`** permite preguntar"
-    msg += "\n\n**`/cachipun`** permite jugar al cachipún :fist: :v:"
-    msg += "\n\n**`/acortar`** permite generar una URL corta"
-    msg += "\n\n**`/ayuda`** permite ver este mensaje\n"
+    msg += '\n**`/recordar`** permite poner un recordatorio :alarm_clock:.\n> Uso: /recordar "asunto" dd-MM-AA hh:mm'
+    msg += "\n**`/clima`** permite ver la temperatura"
+    msg += "\n**`/temblor`** permite ver el último temblor registrado"
+    msg += "\n**`/dado`** permite lanzar un dado"
+    msg += "\n**`/pregunta`** permite preguntar"
+    msg += "\n**`/cachipun`** permite jugar al cachipún"
+    msg += "\n**`/acortar`** permite generar una URL corta"
+    msg += "\n**`/ayuda`** muestra este mensaje"
     await ctx.send(msg)
 
-@bot.command()
-async def temblor(ctx):
-    try:
-        msg = functions.get_temblor()
-    except Exception as e:
-        helpers.log_to_file("/temblor", e, "ERROR")
-        msg = f"Ha ocurrido un problema ({e}) al obtener `/temblor`"
-    await ctx.send(msg)
-
-@bot.command()
-async def clima(ctx, *args):
-    try:
-        msg = functions.get_clima(args)
-    except Exception as e:
-        helpers.log_to_file("/clima", e, "ERROR")
-        msg = f"Ha ocurrido un problema ({e}) al obtener `/clima`"
-    await ctx.send(msg)
-
-@bot.command()
-async def dado(ctx):
-    try:
-        msg = functions.get_dado()
-    except Exception as e:
-        helpers.log_to_file("/dado", e, "ERROR")
-        msg = f"Ha ocurrido un problema ({e}) al obtener `/dado`"
-    await ctx.send(msg)
-
-@bot.command()
-async def pregunta(ctx):
-    try:
-        msg = functions.get_pregunta()
-    except Exception as e:
-        helpers.log_to_file("/pregunta", e, "ERROR")
-        msg = f"Ha ocurrido un problema ({e}) al obtener `/pregunta`"
-    await ctx.send(msg)
-
-@bot.command()
-async def cachipun(ctx, usuario1: discord.User, usuario2: discord.User):
-    try:
-        msg = functions.get_cachipun(usuario1, usuario2)
-    except Exception as e:
-        helpers.log_to_file("/cachipun", e, "ERROR")
-        msg = f"Ha ocurrido un problema ({e}) al ejecutar `/cachipun`"
-    await ctx.send(msg)
-
-@bot.command()
-async def acortar(ctx, *args):
-    try:
-        msg = functions.get_acortar(args)
-    except Exception as e:
-        helpers.log_to_file("/acortar", e, "ERROR")
-        msg = f"Ha ocurrido un problema ({e}) al ejecutar `/acortar`"
-    await ctx.send(msg)
-
-# ==================== COMANDOS DE RECORDATORIOS ====================
-
+# ----------------- COMANDOS DE RECORDATORIOS -----------------
 @bot.command()
 async def recordar(ctx, *args):
     try:
@@ -133,8 +86,7 @@ async def parar(ctx):
         msg = f"Ha ocurrido un problema ({e}) al ejecutar `/parar`"
     await ctx.send(msg)
 
-# ==================== COMANDOS DE MUSICA ====================
-
+# ----------------- COMANDOS DE MUSICA -----------------
 @bot.command()
 async def join(ctx):
     if ctx.author.voice:
@@ -144,52 +96,102 @@ async def join(ctx):
     else:
         await ctx.send("⚠️ Únete a un canal de voz primero")
 
+def get_audio_source_embed(query: str):
+    """Devuelve URL, título, miniatura y duración para embed."""
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'quiet': True,
+        'noplaylist': True,
+        'default_search': 'auto'
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(query, download=False)
+        if 'entries' in info:
+            info = info['entries'][0]
+
+    url = info['url']
+    title = info.get('title', 'Desconocido')
+    thumbnail = info.get('thumbnail', None)
+    duration = str(datetime.timedelta(seconds=info.get('duration', 0)))
+    return url, title, thumbnail, duration
+
+async def play_next(ctx):
+    """Reproduce la siguiente canción en la cola con embed."""
+    guild_id = ctx.guild.id
+    if not music_queues.get(guild_id):
+        await asyncio.sleep(2)
+        if ctx.voice_client:
+            await ctx.voice_client.disconnect()
+        await ctx.send("📭 Cola vacía, desconectándome.")
+        return
+
+    source_url, title, thumbnail, duration = music_queues[guild_id].pop(0)
+    voice_client = ctx.voice_client
+
+    def after_playing(error):
+        if error:
+            print(f"Error al reproducir: {error}")
+        fut = asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
+        try:
+            fut.result()
+        except Exception as e:
+            print(f"Error en after_playing: {e}")
+
+    try:
+        source = discord.FFmpegPCMAudio(source_url, **FFMPEG_OPTIONS)
+        voice_client.play(source, after=after_playing)
+
+        embed = discord.Embed(
+            title="▶️ Reproduciendo ahora",
+            description=f"[{title}](https://www.youtube.com/results?search_query={title.replace(' ', '+')})",
+            color=discord.Color.green()
+        )
+        embed.add_field(name="Duración", value=duration, inline=True)
+        embed.add_field(name="Solicitado por", value=ctx.author.mention, inline=True)
+        if thumbnail:
+            embed.set_thumbnail(url=thumbnail)
+
+        await ctx.send(embed=embed)
+
+    except Exception as e:
+        await ctx.send(f"❌ Error al reproducir: `{e}`")
+        print(f"[FFmpeg error] {e}")
+        await play_next(ctx)
+
 @bot.command()
-async def play(ctx, *, url_or_search: str):
+async def play(ctx, *, query: str):
     voice_client = ctx.voice_client
     if not voice_client:
         if ctx.author.voice:
             voice_client = await ctx.author.voice.channel.connect()
         else:
-            return await ctx.send("⚠️ Únete a un canal de voz primero")
+            return await ctx.send("⚠️ Únete a un canal de voz primero.")
 
-    ydl_opts = {'format': 'bestaudio/best', 'quiet': True, 'noplaylist': True}
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    # Si es un enlace de Spotify → obtenemos título y artista
+    if "spotify.com/track" in query:
         try:
-            info = ydl.extract_info(url_or_search, download=False)
+            track_id = re.search(r"track/([A-Za-z0-9]+)", query).group(1)
+            r = requests.get(f"https://open.spotify.com/oembed?url=https://open.spotify.com/track/{track_id}")
+            data = r.json()
+            query = data["title"]
+            await ctx.send(f"🎧 Buscando en YouTube: `{query}`")
         except Exception as e:
-            return await ctx.send(f"❌ No pude encontrar la canción: {e}")
+            return await ctx.send(f"❌ No pude leer la canción de Spotify: `{e}`")
 
-    source_url = info['url']
-    title = info.get('title', 'Desconocido')
+    try:
+        source_url, title, thumbnail, duration = get_audio_source_embed(query)
+    except Exception as e:
+        return await ctx.send(f"❌ Error al obtener el audio: `{e}`")
 
     guild_id = ctx.guild.id
     if guild_id not in music_queues:
         music_queues[guild_id] = []
-    music_queues[guild_id].append((source_url, title))
+    music_queues[guild_id].append((source_url, title, thumbnail, duration))
 
     await ctx.send(f"🎵 **{title}** agregada a la cola")
 
     if not voice_client.is_playing():
         await play_next(ctx)
-
-async def play_next(ctx):
-    guild_id = ctx.guild.id
-    if not music_queues.get(guild_id):
-        await ctx.voice_client.disconnect()
-        return
-
-    source_url, title = music_queues[guild_id].pop(0)
-
-    def after_playing(error):
-        fut = asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
-        try:
-            fut.result()
-        except Exception as e:
-            print(f"Error after_playing: {e}")
-
-    ctx.voice_client.play(discord.FFmpegPCMAudio(source_url, options='-vn'), after=after_playing)
-    await ctx.send(f"▶️ Reproduciendo: **{title}**")
 
 @bot.command()
 async def skip(ctx):
@@ -218,8 +220,7 @@ async def disconnect(ctx):
     else:
         await ctx.send("⚠️ No estoy en ningún canal de voz")
 
-# ==================== EVENTOS ====================
-
+# ----------------- EVENTOS -----------------
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/ayuda"))
@@ -236,5 +237,5 @@ async def on_command_error(ctx, error):
     else:
         await ctx.send(f"Ocurrió un error: {error}")
 
-# ==================== RUN ====================
+# ----------------- RUN -----------------
 bot.run(os.getenv("TOKEN"))
