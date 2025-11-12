@@ -158,14 +158,25 @@ async def join(ctx):
         await ctx.send("⚠️ Únete a un canal de voz primero")
 
 def search_youtube(query):
-    ydl_opts = {'quiet': True, 'format': 'bestaudio/best', 'noplaylist': True}
+    ydl_opts = {
+        'quiet': True,
+        'format': 'bestaudio/best',
+        'noplaylist': True,
+        'extractor_args': {
+            'youtube': {
+                'player_client': ['android', 'tv_embedded'],
+            }
+        }
+    }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
-            if re.match(r'https?://', query):  # Si es un link
+            if re.match(r'https?://', query):
                 return ydl.extract_info(query, download=False)
-            else:  # Buscar en YouTube
-                info = ydl.extract_info(f"ytsearch:{query}", download=False)
-                return info['entries'][0]
+            else:
+                info = ydl.extract_info(f"ytsearch5:{query}", download=False)
+                for entry in info['entries']:
+                    if 'url' in entry:
+                        return entry
         except Exception as e:
             print(f"Error buscando: {e}")
             return None
@@ -211,9 +222,15 @@ async def play_next(ctx):
         except Exception as e:
             print(f"Error after_playing: {e}")
 
-    options = '-vn -loglevel quiet -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
-    ctx.voice_client.play(discord.FFmpegPCMAudio(source_url, options=options), after=after_playing)
-    await ctx.send(f"▶️ Reproduciendo: **{title}**")
+    ffmpeg_opts = "-vn -loglevel error -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -re"
+    try:
+        audio_source = discord.FFmpegPCMAudio(source_url, before_options=ffmpeg_opts, options="-vn")
+        ctx.voice_client.play(audio_source, after=after_playing)
+        await ctx.send(f"▶️ Reproduciendo: **{title}**")
+    except Exception as e:
+        print(f"Error al reproducir: {e}")
+        await ctx.send("⚠️ No se pudo reproducir esa canción, intentando la siguiente...")
+        await play_next(ctx)
 
 @bot.command()
 async def skip(ctx):
