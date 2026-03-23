@@ -189,29 +189,33 @@ def search_youtube(query):
 
 @bot.command()
 async def play(ctx, *, query: str):
-    if not ctx.author.voice:
-        return await ctx.send("⚠️ Únete a un canal de voz primero")
+    try:
+        if not ctx.author.voice:
+            return await ctx.send("⚠️ Únete a un canal de voz primero")
 
-    voice_client = ctx.voice_client
-    if not voice_client:
-        voice_client = await ctx.author.voice.channel.connect()
+        voice_client = ctx.voice_client
+        if not voice_client:
+            voice_client = await ctx.author.voice.channel.connect()
 
-    info = search_youtube(query)
-    if not info:
-        return await ctx.send("❌ No se pudo encontrar la canción")
+        info = search_youtube(query)
+        if not info:
+            return await ctx.send("❌ No se pudo encontrar la canción")
 
-    source_url = info['url']
-    title = info.get('title', 'Desconocido')
+        source_url = info['url']
+        title = info.get('title', 'Desconocido')
 
-    guild_id = ctx.guild.id
-    if guild_id not in music_queues:
-        music_queues[guild_id] = []
-    music_queues[guild_id].append((source_url, title))
+        guild_id = ctx.guild.id
+        if guild_id not in music_queues:
+            music_queues[guild_id] = []
+        music_queues[guild_id].append((source_url, title))
 
-    await ctx.send(f"🎶 **{title}** agregada a la cola")
+        await ctx.send(f"🎶 **{title}** agregada a la cola")
 
-    if not voice_client.is_playing():
-        await play_next(ctx)
+        if not voice_client.is_playing():
+            await play_next(ctx)
+    except Exception as e:
+        helpers.log_to_file("/play", str(e), "ERROR")
+        await ctx.send(f"⚠️ Error al reproducir: {e}")
 
 async def play_next(ctx):
     guild_id = ctx.guild.id
@@ -301,12 +305,21 @@ async def on_ready():
     print(f"🤖 El bot está listo como {bot.user}")
 
 @bot.event
+async def on_command(ctx):
+    comando = ctx.command.name if ctx.command else "unknown"
+    parametros = str(ctx.args) if ctx.args else ""
+    if ctx.kwargs:
+        parametros += f" {ctx.kwargs}"
+    helpers.log_command(ctx, comando, parametros)
+
+@bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send(":see_no_evil: Comando no encontrado")
     elif isinstance(error, commands.MissingRequiredArgument):
         await ctx.send(":exclamation: Faltan argumentos")
     else:
+        helpers.log_to_file("on_command_error", str(error), "ERROR")
         await ctx.send(f"Ocurrió un error: {error}")
 
 # ======================================

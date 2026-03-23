@@ -34,3 +34,36 @@ def log_to_file(function, message, prefix=''):
         
     # Imprimir a consola para que Docker (o la terminal) pueda verlo
     print(log_entry.strip())
+
+def log_command(ctx, comando, parametros):
+    """
+    Registra un comando ejecutado por un usuario en la base de datos.
+    Params:
+    - ctx: El contexto del comando de Discord
+    - comando (str): El nombre del comando ejecutado
+    - parametros (str): Los parámetros pasados al comando
+    """
+    import sqlite3
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    try:
+        db_path = os.getenv('DB_PATH', 'roboc.db')
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        usuario_id = ctx.author.id
+        usuario_name = str(ctx.author)
+        channel_id = ctx.channel.id if hasattr(ctx, 'channel') and ctx.channel else None
+        guild_id = ctx.guild.id if hasattr(ctx, 'guild') and ctx.guild else None
+        
+        query = """
+        INSERT INTO command_log (usuario_id, usuario_name, channel_id, guild_id, comando, parametros)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """
+        cursor.execute(query, (usuario_id, usuario_name, channel_id, guild_id, comando, parametros))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        log_to_file("log_command", str(e), "ERROR")
