@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import asyncio
 import datetime
 import os
@@ -12,6 +12,8 @@ import re
 # ======================================
 # CONFIGURACIÓN DEL BOT
 # ======================================
+__version__ = "1.0.0"
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="/", description="Bot para todo uso", intents=intents)
 music_queues = {}
@@ -21,12 +23,16 @@ music_queues = {}
 # ======================================
 
 @bot.command()
-async def ping(ctx):
-    await ctx.send("pong")
+async def info(ctx):
+    embed = discord.Embed(title="ℹ️ Información del Bot", color=discord.Color.blue())
+    embed.add_field(name="Versión", value=f"`{__version__}`", inline=False)
+    embed.add_field(name="Latencia (Ping)", value=f"`{round(bot.latency * 1000)}ms`", inline=False)
+    await ctx.send(embed=embed)
 
 @bot.command()
 async def ayuda(ctx):
     msg = "**Hola!, soy roboc, un 🤖 para todo uso**\n"
+    msg += f"Versión: `{__version__}`\n"
     msg += "Los comandos disponibles son: \n"
     msg += '\n**`/recordar`** pone un recordatorio :alarm_clock:. Ej: `/recordar tarea 05-08-2025 21:30`'
     msg += "\n\n**`/clima`** muestra la temperatura máxima :partly_sunny: en una ciudad."
@@ -263,9 +269,35 @@ async def disconnect(ctx):
 # EVENTOS
 # ======================================
 
+@tasks.loop(minutes=1.0)
+async def check_recordatorios():
+    try:
+        recordatorios_pendientes = recordatorio.Recordatorio().execute_recordatorios()
+        if recordatorios_pendientes and recordatorios_pendientes != -1:
+            for rec in recordatorios_pendientes:
+                rec_id = rec[0]
+                user_id = rec[1]
+                asunto = rec[2]
+                
+                user = await bot.fetch_user(user_id)
+                if user:
+                    try:
+                        await user.send(f"⏰ **¡RECORDATORIO!** ⏰\n\nHola, me pediste que te recordara lo siguiente:\n> {asunto}")
+                    except discord.Forbidden:
+                        print(f"No pude enviar DM a {user.name}")
+                
+                recordatorio.Recordatorio().mark_as_done(rec_id)
+    except Exception as e:
+        helpers.log_to_file("check_recordatorios", e, "ERROR")
+
+@check_recordatorios.before_loop
+async def before_check_recordatorios():
+    await bot.wait_until_ready()
+
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="/ayuda"))
+    check_recordatorios.start()
     print(f"🤖 El bot está listo como {bot.user}")
 
 @bot.event

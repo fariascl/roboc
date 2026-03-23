@@ -37,10 +37,10 @@ class Recordatorio:
             # print(res)
             msg = "Historial de recordatorios\n"
             for row in res:
-                _fecha = row[2]
-                _fecha_fixed = f"{_fecha.day}-{_fecha.month}-{_fecha.year} {_fecha.hour}:{_fecha.minute}"
-                _created_at = row[4]
-                _created_at_fixed = f"{_created_at.day}-{_created_at.month}-{_created_at.year} {_created_at.hour}:{_created_at.minute}"
+                _fecha = datetime.datetime.strptime(row[2], "%Y-%m-%d %H:%M")
+                _fecha_fixed = f"{_fecha.day}-{_fecha.month}-{_fecha.year} {_fecha.hour}:{_fecha.minute:02d}"
+                _created_at = datetime.datetime.strptime(row[4], "%Y-%m-%d %H:%M:%S")
+                _created_at_fixed = f"{_created_at.day}-{_created_at.month}-{_created_at.year} {_created_at.hour}:{_created_at.minute:02d}"
 
                 msg += f"Asunto: {row[1]}\n Fecha recordatorio: {_fecha_fixed}\n Fecha creación: {_created_at_fixed}\n Estado: {row[3]}\n"
                 msg += "\n"
@@ -57,7 +57,7 @@ class Recordatorio:
 
         try:
             cursor = self.conn.cursor()
-            query = "SELECT usuario_id, asunto, fecha, created_at, status FROM recordatorio WHERE fecha = ?;"
+            query = "SELECT id, usuario_id, asunto, fecha, created_at, status FROM recordatorio WHERE fecha = ? AND status = 'on';"
             cursor.execute(query, (now,))
             res = cursor.fetchall()
             cursor.close()
@@ -69,7 +69,16 @@ class Recordatorio:
             helpers.log_to_file("execute_recordatorio", e, "ERROR")
             return -1
 
-    # return "Hubo un problema para ejecutar el recordatorio creado, inténtelo más tarde"
+    def mark_as_done(self, record_id):
+        try:
+            cursor = self.conn.cursor()
+            query = "UPDATE recordatorio SET status='off' WHERE id = ?;"
+            cursor.execute(query, (record_id,))
+            self.conn.commit()
+            cursor.close()
+            self.conn.close()
+        except Exception as e:
+            helpers.log_to_file("mark_as_done", e, "ERROR")
 
     def get_last_recordatorio(self, usuario_id):
         try:

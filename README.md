@@ -6,31 +6,20 @@ Bot experimental de Discord en Python
 
 Es necesario tener instalado previamente Python 3 y Pip. De no ser así, se instala a través del siguiente comando:
 
-Debian/Ubuntu: `sudo apt-get install -y python3 python3-pip`
+Debian/Ubuntu: `sudo apt-get install -y python3 python3-pip sqlite3`
 
-Fedora: `sudo dnf install python3 -y python3-pip`
+Fedora: `sudo dnf install python3 -y python3-pip sqlite3`
 
-También, es necesario instalar MariaDB/MySQL Server
+Posterior a esto, se debe **crear la base de datos**.
 
-Debian/Ubuntu: `sudo apt-get install -y mariadb-server`
+Teniendo los pasos anteriores, se debe importar el archivo `schema.sql` en la base de datos de SQLite (`sqlite3 roboc.db < schema.sql`).
 
-Fedora: `sudo dnf install mysql-community-server`
-
-Luego, ejecutar el instalador (`sudo mysql_secure_installation`), seguir los pasos y finalizar. Posterior a esto, se debe **crear la base de datos, crear el usuario y asignarle los privilegios del usuario sobre la base de datos**.
-
-Teniendo los pasos anteriores, se debe importar el archivo `schema.sql` en la base de datos creada. (`SOURCE schema.sql`).
-
-Hecho lo anterior, se debe cambiar el nombre del archivo `env.example` a .`env`, y en su contenido se debe configurar las variables de entorno, como las que se ven a continuación
-
+Hecho lo anterior, se debe cambiar el nombre del archivo `env.example` a `.env`, y en su contenido se debe configurar las variables de entorno, como las que se ven a continuación
 
 ```
 TOKEN=<token discord>
 API_CLIMA_TOKEN=<(*)>
-
-DB_HOST=<servidor base de datos>
-DB_USER=<usuario base de datos>
-DB_PASSWORD=<contraseña base de datos>
-DB_NAME=<nombre base de datos>
+DB_PATH=roboc.db
 ```
 (*) Para configurar la variable de entorno `API_CLIMA_TOKEN`, es necesario registrarse en la página de [meteored.cl](https://www.meteored.cl/api/#/registro) para así obtener una __affiliate_id__ (API KEY).
 
@@ -68,6 +57,8 @@ Uso: /pregunta "me irá bien en el certamen?"
 
 /cachipun permite jugar al cachipún ✊ 🫲 ✌️ (al azar) entre dos usuarios.
 Uso: /cachipun @usuarioA @usuarioB
+
+/info muestra información de la versión y latencia del bot.
 
 /ayuda permite ver este mensaje
 ```
