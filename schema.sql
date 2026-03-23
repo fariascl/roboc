@@ -1,4 +1,4 @@
-CREATE TABLE recordatorio (
+CREATE TABLE IF NOT EXISTS recordatorio (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     usuario_id INTEGER,
     asunto TEXT,
