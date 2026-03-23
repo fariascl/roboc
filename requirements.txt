@@ -3,4 +3,4 @@ discord.py==2.7.1
 python_dotenv==1.0.0
 pymysql==1.0.2
 yt-dlp
-PyNaCl
+davey>=0.1.0
