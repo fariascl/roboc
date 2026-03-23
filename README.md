@@ -29,8 +29,22 @@ Para finalizar, se deben instalar las dependencias:
 
 Y ejecutar el bot:
 
-`python3 roboc.py`
+`python3 src/roboc.py`
 
+### Instalación con Docker (Recomendado)
+
+Si prefieres usar Docker, la instalación es mucho más sencilla:
+
+1. Crea y configura tu archivo `.env` basándote en `env.example`.
+2. Asegúrate de tener los archivos `roboc.db` (puede ser un archivo vacío) y el directorio `storage/logs` creados en la raíz de tu proyecto para evitar problemas de permisos de volumen:
+   ```bash
+   touch roboc.db
+   mkdir -p storage/logs
+   ```
+3. Ejecuta el contenedor:
+   ```bash
+   docker compose up -d
+   ```
 
 ## Uso
 Para utilizar el bot, es necesario darle los permisos en el servidor en el cual el roboc es miembro.

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: roboc-discord-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Mount the database to persist data
+      - ./roboc.db:/app/roboc.db
+      # Mount the logs folder to persist and easily read logs
+      - ./storage/logs:/app/storage/logs
